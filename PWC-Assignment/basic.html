@@ -1,0 +1,78 @@
+<html>
+    <!--Import Css and Javascript files -->
+  <head>
+    <title>Search Map Appliccation</title>
+    <link rel="stylesheet" type="text/css" href="./style.css" />
+    <script type="module" src="./Map.js"></script>   
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBxBWca1rC8AGqC9I9h4eZS5TAz7oM-LSc"></script>
+  </head>
+  <!--Map should be viewd in a DIV -->
+  <body>
+    <div id="map"></div>
+
+    <!--This form allows the user to Search for a Location-->
+    <form id="MYFORM" style="display: flex;justify-content: center; ">
+    <input type="text" id="CityName" placeholder="Enter City/County Name" class="input" ></input>
+    <button type="submit" class="button">Go!</button>
+</form>
+</div>
+
+<script >
+let map;
+document.addEventListener("DOMContentLoaded",function(){
+    // after HTML page load 
+    const input = document.getElementById("CityName");
+    const divmap = document.getElementById("map");
+    const MainForm = document.getElementById("MYFORM");
+    //var myLat=0,myLon=0; 
+     map = new google.maps.Map(divmap, {
+           zoom: 3,
+           center: { lat: 31.9539494, lng: 35.910635 },
+           mapId: "927d112b07e8466a"
+         });
+         const marker = new google.maps.Marker({
+            position: map.center,
+            map: map,
+            });
+         
+
+    MainForm.addEventListener("submit",function(event){
+     
+    //after Pressing the submit button
+    event.preventDefault(); 
+    //Get the User input value 
+    const searchcity=input.value;
+    input.value="";
+   
+    //xml request to return lat and lng from json file
+    const xhr = new XMLHttpRequest(); //this object allows interacting with the api and server to retrieve wanted data
+    xhr.open("GET", `https://maps.googleapis.com/maps/api/geocode/json?address=${searchcity}&key=AIzaSyBxBWca1rC8AGqC9I9h4eZS5TAz7oM-LSc`);
+    xhr.onload = function() {
+     try{  //To avoid searching for anything not supported by api used TRY CATCH handler   
+    if (xhr.status === 200) {
+    const data = JSON.parse(xhr.responseText);//the request returns a JSON file so we should extract data from it 
+    myLat=data.results[0].geometry.location.lat;
+    myLon=data.results[0].geometry.location.lng;
+    console.log(myLat,myLon);
+  }
+  else if (xhr.status===400){
+    alert("Wrong City/Country input or empty text,Please try again ");
+  }
+}
+    catch(error){//When wrong input occur alert the user 
+    alert("Wrong City/Country input,Please try again ");
+    }
+    const newCoordinates = { lat: myLat, lng: myLon };
+    //map.setCenter(newCoordinates) // also could be used
+    map.panTo(newCoordinates)
+    const marker = new google.maps.Marker({
+    position: newCoordinates,
+    map: map,
+  });
+  };
+    xhr.send();   
+      });
+    });
+</script>
+</body>
+</html>
